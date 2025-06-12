@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: surekha_postgres4
+    ports:
+      - "5802:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: staffdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    build: ./Backend
+    container_name: surekha_backend4
+    ports:
+      - "3802:3802"
+    depends_on:
+      - postgres
+    environment:
+      - PORT=3802
+      - DB_USER=admin
+      - DB_PASSWORD=admin123
+      - DB_HOST=postgres
+      - DB_NAME=staffdb
+      - DB_PORT=5432
+    volumes:
+      - ./Backend:/app
+
+  staff:
+    build: ./Staff
+    container_name: surekha_staff
+    ports:
+      - "8104:80"
+    depends_on:
+      - backend
+    volumes:
+      - ./Staff:/usr/share/nginx/html
+    restart: always
+
+volumes:
+  postgres_data:
+
